@@ -179,7 +179,7 @@ export function getClientIP(req: any): string {
   const ip = forwarded 
     ? (typeof forwarded === 'string' ? forwarded.split(',')[0] : forwarded[0])
     : req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
-  
+   
   return ip.trim();
 }
 

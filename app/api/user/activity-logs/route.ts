@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { activityLogs } from '../../../../lib/db/schemas/activitylog';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import {count} from 'drizzle-orm'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
