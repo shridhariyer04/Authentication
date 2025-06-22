@@ -170,7 +170,7 @@ export default function Register() {
           setError("Sign-in succeeded but session not created. Please try again.");
         }
       } else {
-        setError("Google sign-in was cancelled or failed.");
+        // setError("Google sign-in was cancelled or failed.");
       }
     } catch (error: any) {
       console.error('Google sign-in error:', error);
