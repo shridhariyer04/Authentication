@@ -41,9 +41,14 @@ export default function HomePage() {
           <nav className="flex items-center space-x-6">
             <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
             <a href="#tech" className="text-gray-600 hover:text-gray-900 transition-colors">Tech Stack</a>
-            <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+            <a 
+              href="https://www.authentication.sbs/register"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+            >
               Get Started
-            </button>
+            </a>
           </nav>
         </div>
       </header>
@@ -60,13 +65,23 @@ export default function HomePage() {
             OTP verification, activity tracking, and comprehensive security measures.
           </p>
           <div className="flex items-center justify-center space-x-4">
-            <button className="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2">
+            <a 
+              href="https://www.authentication.sbs/register"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2"
+            >
               <span>Try Demo</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
-            <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+            </a>
+            <a 
+              href="https://github.com/shridhariyer04/Authentication"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               View Docs
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -203,12 +218,22 @@ export default function HomePage() {
             Clone the repository and have a secure authentication system running in minutes
           </p>
           <div className="flex items-center justify-center space-x-4">
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
+            <a 
+              href="https://github.com/shridhariyer04/Authentication"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+            >
               View Documentation
-            </button>
-            <button className="border border-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            </a>
+            <a 
+              href="https://www.authentication.sbs/register"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors"
+            >
               Live Demo
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -225,7 +250,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-6">
               <span className="text-gray-600">Built with ❤️ for developers</span>
               <a 
-                href="https://github.com/yourusername/auth-system" 
+                href="https://github.com/shridhariyer04/Authentication" 
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
