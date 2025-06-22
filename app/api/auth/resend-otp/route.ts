@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { users, verificationTokens } from '../../../../lib/db/schemas';
+import { users, verificationTokens } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { Resend } from 'resend';
+import { ActivityLogger } from '@/lib/activitylogs'; // Adjusted import path
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -20,7 +21,6 @@ function generateOTP(): string {
 // Send OTP email via Resend
 async function sendVerificationEmail(email: string, otp: string) {
   try {
-    // Check if RESEND_API_KEY is configured
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured');
       return false;
@@ -30,8 +30,8 @@ async function sendVerificationEmail(email: string, otp: string) {
     console.log('Using new OTP:', otp);
 
     const result = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>', // Use resend.dev domain for testing
-      to: [email], // Array format is recommended
+      from: 'Acme <onboarding@resend.dev>',
+      to: [email],
       subject: 'New Verification Code',
       html: `
         <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
@@ -50,7 +50,6 @@ async function sendVerificationEmail(email: string, otp: string) {
     return true;
   } catch (error) {
     console.error('Email sending failed:', error);
-    // Log more details about the error
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
@@ -91,7 +90,7 @@ export async function POST(request: Request) {
 
     // Generate new OTP
     const otp = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Send verification email first
     const emailSent = await sendVerificationEmail(email, otp);
@@ -111,6 +110,9 @@ export async function POST(request: Request) {
       expiresAt,
       used: false,
     });
+
+    // Log the email verification resend activity
+    await ActivityLogger.logEmailVerification(user[0].id, email, request as any, );
 
     console.log('New verification token created and email sent');
 

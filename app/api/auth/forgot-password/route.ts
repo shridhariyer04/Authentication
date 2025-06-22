@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { users, verificationTokens } from '../../../../lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { Resend } from 'resend';
+import { ActivityLogger } from '@/lib/activitylogs'; // Adjusted import path
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -99,6 +100,9 @@ export async function POST(request: Request) {
         message: 'Failed to send password reset email. Please try again.' 
       }, { status: 500 });
     }
+
+    // Log the password reset request activity
+    await ActivityLogger.logPasswordReset(email, 'request', request as any);
 
     return NextResponse.json({ 
       message: 'Password reset code sent to your email. Please check your inbox.' 

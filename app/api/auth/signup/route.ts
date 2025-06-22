@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
+import { ActivityLogger } from '../../../../lib/activitylogs';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -19,7 +20,6 @@ function generateOTP(): string {
 
 async function sendVerificationEmail(email: string, otp: string) {
   try {
-    // Check if RESEND_API_KEY is configured
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured');
       return false;
@@ -29,8 +29,8 @@ async function sendVerificationEmail(email: string, otp: string) {
     console.log('Using OTP:', otp);
 
     const result = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>', // Use resend.dev domain for testing
-      to: [email], // Array format is recommended
+      from: 'Acme <onboarding@resend.dev>',
+      to: [email],
       subject: 'Verify Your Email Address',
       html: `
         <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
@@ -49,7 +49,6 @@ async function sendVerificationEmail(email: string, otp: string) {
     return true;
   } catch (error) {
     console.error('Email sending failed:', error);
-    // Log more details about the error
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { email, password } = signupSchema.parse(body);
 
-        // Check if user already exists
         const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
         if (existingUser.length) {
@@ -74,9 +72,8 @@ export async function POST(request: NextRequest) {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const otp = generateOTP();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-        // First, try to send the email before creating the user
         console.log('Sending verification email...');
         const emailSent = await sendVerificationEmail(email, otp);
 
@@ -87,18 +84,16 @@ export async function POST(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // Only create user and token if email was sent successfully
-        // Explicitly set isActive to false and emailVerified to null
-        await db.insert(users).values({
+        // Use returning to get the inserted user's ID
+        const newUser = await db.insert(users).values({
             email,
             password: hashedPassword,
-            isActive: false, // Explicitly set to false for unverified users
-            emailVerified: null, // Explicitly set to null until verified
+            isActive: false,
+            emailVerified: null,
             createdAt: new Date(),
             updatedAt: new Date(),
-        });
+        }).returning({ id: users.id });
 
-        // Store verification token
         await db.insert(verificationTokens).values({
             email,
             token: otp,
@@ -106,6 +101,8 @@ export async function POST(request: NextRequest) {
             expiresAt,
             used: false,
         });
+
+        await ActivityLogger.logSignup(newUser[0].id, email, 'email', request);
 
         console.log('User created successfully with isActive: false, verification email sent');
 

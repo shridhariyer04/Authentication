@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { users, accounts } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { ipRateLimiter, emailRateLimiter, getClientIP } from '@/lib/rate-limit';
+import { ActivityLogger } from '../lib/activitylogs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -35,6 +36,9 @@ export const authOptions: NextAuthOptions = {
             const message = ipCheck.blockedUntil 
               ? `Too many failed attempts from your IP. Try again after ${ipCheck.blockedUntil.toLocaleTimeString()}`
               : `Too many attempts from your IP. Please try again later.`;
+            
+            // Log rate limit exceeded
+            await ActivityLogger.logRateLimitExceeded(email, 'ip', req as any);
             throw new Error(message);
           }
 
@@ -43,6 +47,9 @@ export const authOptions: NextAuthOptions = {
             const message = emailCheck.blockedUntil 
               ? `Too many failed attempts for this email. Try again after ${emailCheck.blockedUntil.toLocaleTimeString()}`
               : `Too many attempts for this email. Please try again later.`;
+            
+            // Log rate limit exceeded
+            await ActivityLogger.logRateLimitExceeded(email, 'email', req as any);
             throw new Error(message);
           }
 
@@ -54,10 +61,11 @@ export const authOptions: NextAuthOptions = {
             .limit(1);
 
           if (!user.length) {
-            // Record failed attempt
+            // Record failed attempt and log activity
             await Promise.all([
               ipRateLimiter.recordAttempt(clientIP, false),
-              emailRateLimiter.recordAttempt(email, false)
+              emailRateLimiter.recordAttempt(email, false),
+              ActivityLogger.logFailedLogin(email, 'User not found', req as any)
             ]);
             throw new Error('Invalid credentials');
           }
@@ -77,17 +85,19 @@ export const authOptions: NextAuthOptions = {
               .limit(1);
 
             if (googleAccount.length) {
-              // Record failed attempt
+              // Record failed attempt and log activity
               await Promise.all([
                 ipRateLimiter.recordAttempt(clientIP, false),
-                emailRateLimiter.recordAttempt(email, false)
+                emailRateLimiter.recordAttempt(email, false),
+                ActivityLogger.logFailedLogin(email, 'Attempted password login on Google account', req as any)
               ]);
               throw new Error('This account is linked to Google. Please use Google to sign in, or contact support to set up a password.');
             } else {
               // Account exists but has no password and no Google link - this shouldn't happen
               await Promise.all([
                 ipRateLimiter.recordAttempt(clientIP, false),
-                emailRateLimiter.recordAttempt(email, false)
+                emailRateLimiter.recordAttempt(email, false),
+                ActivityLogger.logFailedLogin(email, 'Account setup incomplete', req as any)
               ]);
               throw new Error('Account setup incomplete. Please contact support.');
             }
@@ -95,10 +105,11 @@ export const authOptions: NextAuthOptions = {
 
           // Check if user account is active (email verified)
           if (!foundUser.isActive) {
-            // Record failed attempt
+            // Record failed attempt and log activity
             await Promise.all([
               ipRateLimiter.recordAttempt(clientIP, false),
-              emailRateLimiter.recordAttempt(email, false)
+              emailRateLimiter.recordAttempt(email, false),
+              ActivityLogger.logFailedLogin(email, 'Account not activated', req as any)
             ]);
             throw new Error('Please verify your email address before logging in');
           }
@@ -106,21 +117,23 @@ export const authOptions: NextAuthOptions = {
           // Verify password
           const passwordMatch = await bcrypt.compare(credentials.password, foundUser.password);
           if (!passwordMatch) {
-            // Record failed attempt
+            // Record failed attempt and log activity
             await Promise.all([
               ipRateLimiter.recordAttempt(clientIP, false),
-              emailRateLimiter.recordAttempt(email, false)
+              emailRateLimiter.recordAttempt(email, false),
+              ActivityLogger.logFailedLogin(email, 'Invalid password', req as any)
             ]);
             throw new Error('Invalid credentials');
           }
 
-          // Success! Record successful attempt and update user
+          // Success! Record successful attempt, update user, and log activity
           await Promise.all([
             ipRateLimiter.recordAttempt(clientIP, true),
             emailRateLimiter.recordAttempt(email, true),
             db.update(users)
               .set({ updatedAt: new Date() })
-              .where(eq(users.id, foundUser.id))
+              .where(eq(users.id, foundUser.id)),
+            ActivityLogger.logLogin(foundUser.id, foundUser.email, 'email', req as any)
           ]);
 
           // Return user object (will be available in session)
@@ -170,6 +183,7 @@ export const authOptions: NextAuthOptions = {
             .limit(1);
 
           let userId: string;
+          let isNewUser = false;
 
           if (existingUser.length) {
             console.log('Existing user found:', existingUser[0].id);
@@ -191,6 +205,7 @@ export const authOptions: NextAuthOptions = {
             console.log('Updated existing user');
           } else {
             console.log('Creating new user');
+            isNewUser = true;
             // Create new user from Google OAuth
             const newUser = await db.insert(users).values({
               email: email,
@@ -255,6 +270,13 @@ export const authOptions: NextAuthOptions = {
                 eq(accounts.providerAccountId, account.providerAccountId)
               ));
             console.log('Updated Google account record');
+          }
+
+          // Log the appropriate activity
+          if (isNewUser) {
+            await ActivityLogger.logSignup(userId, email, 'google');
+          } else {
+            await ActivityLogger.logLogin(userId, email, 'google');
           }
 
           // Update the user object with the database ID for the session
@@ -385,13 +407,19 @@ export const authOptions: NextAuthOptions = {
     }
   },
 
+  events: {
+    async signOut({ token }) {
+      // Log user logout
+      if (token?.userId) {
+        await ActivityLogger.logLogout(token.userId as string);
+      }
+    }
+  },
+
   pages: {
     signIn: '/login',
     error: '/auth/error',
   },
-  
-  // Add default redirect URLs
-  
 
   session: {
     strategy: 'jwt',

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { users, verificationTokens } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
+import { ActivityLogger } from '@/lib/activitylogs'; // Adjusted import path
 
 // Zod schema for OTP verification
 const verifyOtpSchema = z.object({
@@ -65,7 +66,6 @@ export async function POST(request: Request) {
 
     // Update user verification status with local timezone
     const now = new Date();
-    // Convert to IST (India Standard Time) - UTC+5:30
     const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
     const istTime = new Date(now.getTime() + istOffset);
     
@@ -73,10 +73,13 @@ export async function POST(request: Request) {
       .update(users)
       .set({ 
         isActive: true,
-        emailVerified: istTime, // Use IST time
+        emailVerified: istTime,
         updatedAt: istTime
       })
       .where(eq(users.email, email));
+
+    // Log the email verification activity
+    await ActivityLogger.logEmailVerification(user[0].id, email, request as any);
 
     console.log('Email verified successfully for:', email);
 
