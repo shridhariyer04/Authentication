@@ -29,7 +29,7 @@ async function sendPasswordResetEmail(email: string, otp: string) {
     console.log('Using OTP:', otp);
 
     const result = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
+      from: 'Auth Center <noreply@authentication.sbs>',
       to: [email],
       subject: 'Password Reset Verification Code',
       html: `

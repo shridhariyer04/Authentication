@@ -22,7 +22,7 @@ function generateOTP(): string {
 async function sendPasswordResetEmail(email: string, otp: string) {
   try {
     await resend.emails.send({
-      from: 'onboarding@yourdomain.com', // Replace with your verified domain
+      from:'Auth Center <noreply@authentication.sbs>', // Replace with your verified domain
       to: email,
       subject: 'Password Reset Code',
       html: `

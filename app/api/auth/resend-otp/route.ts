@@ -30,7 +30,7 @@ async function sendVerificationEmail(email: string, otp: string) {
     console.log('Using new OTP:', otp);
 
     const result = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
+      from: 'Auth Center <noreply@authentication.sbs>',
       to: [email],
       subject: 'New Verification Code',
       html: `
