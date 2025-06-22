@@ -156,7 +156,7 @@ export default function Register() {
       });
 
       if (result?.error) {
-        // setError(`Google sign-in failed: ${result.error}`);
+        console.log("Signup Done")
       } else if (result?.ok) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
