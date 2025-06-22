@@ -260,8 +260,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Your Name**
 - GitHub: https://github.com/shridhariyer04
-- Portfolio: 
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+- Portfolio: https://shridhariyer-portfolio.vercel.app/portfolio
+- LinkedIn:www.linkedin.com/in/shridhar-iyer-94a526272
 
 ---
 
