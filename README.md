@@ -117,19 +117,18 @@ A scheduled **cron job** runs periodically to clean up:
 
 <!-- 📸 ADD SCREENSHOT: Login/Signup page -->
 ### Authentication Pages
-![Login Page](https://via.placeholder.com/600x400/10B981/FFFFFF?text=Add+Login+Page+Screenshot)
+
 
 <!-- 📸 ADD SCREENSHOT: OTP verification screen -->
 ### OTP Verification
-![OTP Verification](https://via.placeholder.com/600x400/8B5CF6/FFFFFF?text=Add+OTP+Verification+Screenshot)
+
 
 <!-- 📸 ADD SCREENSHOT: User dashboard -->
 ### User Dashboard
-![User Dashboard](https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Add+Dashboard+Screenshot)
+https://github.com/shridhariyer04/Authentication/issues/4#issue-3166397435
 
 <!-- 📸 ADD SCREENSHOT: Activity logs page -->
 ### Activity Logs
-![Activity Logs](https://via.placeholder.com/600x400/EF4444/FFFFFF?text=Add+Activity+Logs+Screenshot)
 
 ---
 
