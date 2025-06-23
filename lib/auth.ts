@@ -293,6 +293,29 @@ export const authOptions: NextAuthOptions = {
           }
           return false;
         }
+      } else if (account?.provider === 'credentials') {
+        // Handle credentials sign-in
+        try {
+          const email = user.email!.toLowerCase().trim();
+          const existingUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+
+          if (existingUser.length) {
+            await ActivityLogger.logLogin(existingUser[0].id, email, 'email');
+            user.id = existingUser[0].id;
+            console.log('Credentials sign-in successful for user:', existingUser[0].id);
+            return true;
+          } else {
+            console.error('User not found for credentials login');
+            return false;
+          }
+        } catch (error) {
+          console.error('Credentials sign-in error:', error);
+          return false;
+        }
       }
 
       // For credentials provider, authorization already handled in authorize callback
