@@ -117,7 +117,7 @@ A scheduled **cron job** runs periodically to clean up:
 
 <!-- 📸 ADD SCREENSHOT: Login/Signup page -->
 ### Authentication Pages
-
+https://github.com/shridhariyer04/Authentication/issues/2#issue-3166391241
 
 <!-- 📸 ADD SCREENSHOT: OTP verification screen -->
 ### OTP Verification
@@ -129,7 +129,7 @@ https://github.com/shridhariyer04/Authentication/issues/4#issue-3166397435
 
 <!-- 📸 ADD SCREENSHOT: Activity logs page -->
 ### Activity Logs
-
+https://github.com/shridhariyer04/Authentication/issues/3#issue-3166394985
 ---
 
 ## 🚀 Getting Started
