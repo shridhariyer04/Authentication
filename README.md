@@ -2,10 +2,10 @@
 
 A robust and secure **authentication system** built using modern technologies and production-ready practices. It features user signup, login (email + Google), OTP verification, password recovery, activity tracking, and more — all built with scalability and security in mind.
 
-<!-- 📸 ADD SCREENSHOT: Main banner/hero image of your application -->
-![Application Banner](https://via.placeholder.com/800x400/0EA5E9/FFFFFF?text=Add+Your+Banner+Screenshot+Here)
 
----
+https://github.com/shridhariyer04/Authentication/issues/1#issue-3166388889
+
+
 
 ## ✨ Features
 
